@@ -105,6 +105,7 @@ test.each(apiDeclarationsEntries)(
 
     const apis = userEvent.setup({[opt]: true})
 
+    // eslint-disable-next-line testing-library/await-async-events
     expect(apis[name]).toHaveProperty('name', `mock-${name}`)
 
     // Replace the asyncWrapper to make sure that a delayed state update happens inside of it

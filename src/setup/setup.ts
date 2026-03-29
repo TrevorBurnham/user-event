@@ -16,6 +16,9 @@ import {System} from '../system'
 import {userEventApi} from './api'
 import {wrapAsync} from './wrapAsync'
 import {DirectOptions} from './directApi'
+import {getTimerAdvancer} from '../utils/misc/timerDetection'
+
+const noopAdvanceTimers = () => Promise.resolve()
 
 /**
  * Default options applied when API is called per `userEvent.anyApi()`
@@ -32,7 +35,7 @@ const defaultOptionsDirect: Required<Options> = {
   skipClick: false,
   skipHover: false,
   writeToClipboard: false,
-  advanceTimers: () => Promise.resolve(),
+  advanceTimers: noopAdvanceTimers,
 }
 
 /**
@@ -69,10 +72,13 @@ export function createConfig(
   node?: Node,
 ): Config {
   const document = getDocument(options, node, defaults)
+  const advanceTimers =
+    options.advanceTimers ?? getTimerAdvancer() ?? defaults.advanceTimers
 
   return {
     ...defaults,
     ...options,
+    advanceTimers,
     document,
   }
 }
@@ -146,9 +152,9 @@ export function createInstance(
   config: Config,
   system: System = new System(),
 ): {
-    instance: Instance
-    api: UserEvent
-  } {
+  instance: Instance
+  api: UserEvent
+} {
   const instance = {} as Instance
   Object.assign(instance, {
     config,
